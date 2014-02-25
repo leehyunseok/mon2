@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+ 
+ <sqlMap namespace="common">
+ 	
+
+ <typeAlias alias="monTargetVO" type="kr.co.hdable.vo.MonTargetVO" />
+ <typeAlias alias="monTargetDetailVO" type="kr.co.hdable.vo.MonTargetDetailVO" />
+  
+  <!--  전체 상태 -->
+  <select id="getMonState" resultClass="monTargetVO">
+    SELECT  id ,name , state , mic ,explanation, depart , regname from mon_list
+  </select>
+  
+  <!-- 인프라 영역 장애 상태 입력 -->
+  <insert id="setMonTatgetDetail" parameterClass="monTargetDetailVO">
+    INSERT INTO mon_detail (id, mic, state , descr, name, explanation, depart ) VALUES( #id# , #mic#, #state#, #descr#,#name#, #explanation#, #depart# )
+  </insert>
+
+  <!-- 인프라 영역 장애 내역 조회 -->
+  <select id="getMonTargetDetail" parameterClass="monTargetDetailVO" resultClass="monTargetDetailVO">
+    SELECT * FROM MON_DETAIL where id = #id# order by UPD_DT desc   
+  </select>
+  
+  <!-- 채널 영역 전체 리스트 check 변경 -->
+  <update id="updateMonListCheckState">
+    UPDATE mon_list set state='check' where id like 'C_%'   
+  </update>
+
+  <!-- 인프라 영역 장애 등록 관련된 mon_list 테이블 update -->  
+  <update id="updateMonListFromDetailVO">
+    UPDATE mon_list set mic = #mic#, state=#state#, name=#name#, explanation=#explanation#, depart = #depart# ,regname = #regname# where id = #id#  
+  </update>
+  
+  <!--  parameter 처리  -->
+  <update id="updateMonTarget" parameterClass="monTargetVO">
+    UPDATE mon_list set state=#state#, regname = #regname# where id = #id#  
+  </update>  
+ 
+ 
+ <!--  스택 차트 상태 갯수 조회 -->
+  <select id="getStackChart" resultClass="int">
+    SELECT  count(*) from mon_list where state = #strCon#
+  </select>
+  
+  <!-- 인프라 영역 장애 내역 조회 -->
+  <select id="getIntraStateMsg"  resultClass="monTargetDetailVO">
+  	<![CDATA[
+    select * from ( SELECT * FROM MON_DETAIL where state ='down' order by UPD_DT desc ) where rownum <= 1
+    ]]>
+  </select>  
+ 
+ </sqlMap>
